@@ -1,25 +1,21 @@
-use serenity::{
-    async_trait,
-    client::{
+use serenity::{model::prelude::Activity, model::prelude::OnlineStatus, async_trait, client::{
         Client,
         Context,
         EventHandler
-    },
-    model::{
-        channel::{
-            Message
-        }
-    },
-    framework::standard::{
+    }, framework::standard::{
         StandardFramework,
         CommandResult,
         macros::{
             command,
             group
         }
-    }
-};
+    }, model::prelude::Ready, model::{
+        channel::{
+            Message
+        }
+    }};
 
+use dotenv::dotenv;
 use std::env;
 
 #[group]
@@ -29,13 +25,21 @@ struct General;
 struct Handler;
 
 #[async_trait]
-impl EventHandler for Handler {}
+impl EventHandler for Handler {
+    async fn ready(&self, ctx: Context, ready: Ready) {
+        println!("Logged in as {}", ready.user.tag());
+
+        ctx.set_presence(Some(Activity::streaming("Dot Downloads", "https://id.twitch.tv/oauth2/authorize?client_id=jpoy9odw2cvu1hwmyrv5ur5q8nd0y6&force_verify=true&lang=en&login_type=login&redirect_uri=https://dothq.co&response_type=c")), OnlineStatus::DoNotDisturb).await;
+    }
+}
 
 #[tokio::main]
 async fn main() {
     let framework = StandardFramework::new()
         .configure(|c| c.prefix("~"))
         .group(&GENERAL_GROUP);
+
+    dotenv().ok();
 
     let token = env::var("DISCORD_TOKEN").expect("Token environment variable is not set");
     let mut client = Client::builder(token)
