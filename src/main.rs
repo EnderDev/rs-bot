@@ -1,4 +1,4 @@
-use serenity::{model::prelude::Activity, model::prelude::OnlineStatus, async_trait, client::{
+use serenity::{async_trait, client::{
         Client,
         Context,
         EventHandler
@@ -9,17 +9,17 @@ use serenity::{model::prelude::Activity, model::prelude::OnlineStatus, async_tra
             command,
             group
         }
-    }, model::prelude::Ready, model::{
+    }, framework::standard::Args, model::prelude::Activity, utils::ContentSafeOptions, model::prelude::OnlineStatus, model::prelude::Ready, model::{
         channel::{
             Message
         }
-    }};
+    }, utils::content_safe};
 
 use dotenv::dotenv;
 use std::env;
 
 #[group]
-#[commands(ping)]
+#[commands(ping, download)]
 struct General;
 
 struct Handler;
@@ -55,7 +55,24 @@ async fn main() {
 
 #[command]
 async fn ping(ctx: &Context, msg: &Message) -> CommandResult {
-    msg.reply(ctx, "Pong!").await?;
+    msg.reply(ctx, "Pong").await?;
+
+    Ok(())
+}
+
+#[command]
+async fn download(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
+    let platform = content_safe(&ctx.cache, &args.rest(), &ContentSafeOptions::default()).await;
+
+    if platform == "windows" {
+        msg.reply(ctx, "No builds for Windows yet.").await?;
+    } else if platform == "ubuntu" {
+        msg.reply(ctx, "linux = sex").await?;
+    } else if platform == "macos" {
+        msg.reply(ctx, "what big corporation os is bad").await?;
+    } else {
+        msg.reply(ctx, "Specify what version you want to download. `windows, macos, ubuntu`").await?;
+    }
 
     Ok(())
 }

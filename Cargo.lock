@@ -829,6 +829,7 @@ dependencies = [
 name = "rs-bot"
 version = "0.1.0"
 dependencies = [
+ "chrono",
  "dotenv",
  "serenity",
  "tokio",
